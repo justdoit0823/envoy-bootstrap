@@ -1,0 +1,43 @@
+
+---
+
+
+- hosts: envoy-servers
+  remote_user: "{{user}}"
+  gather_facts: false
+  vars:
+    ansible_become_pass: "{{become_pass}}"
+  tasks:
+  - name: build envoy workspace
+    file:
+      path: "{{item}}"
+      state: directory
+      mode: 0754
+    with_items:
+      - "{{envoy_workspace}}"
+      - "{{envoy_workspace}}/bin"
+      - "{{envoy_workspace}}/conf"
+      - "{{envoy_workspace}}/lib64"
+      - "{{envoy_workspace}}/logs"
+      - "{{envoy_workspace}}/pb"
+
+  - name: upload envoy files
+    synchronize:
+      src: "{{item.src}}"
+      dest: "{{item.dst}}"
+      archive: true
+      checksum: true
+      compress: true
+      rsync_opts:
+        - "--exclude=.git"
+        - "--exclude=.cache"
+        - "--exclude=logs"
+        - "--exclude=*.pyc"
+        - "--exclude=*~"
+    with_items:
+      - {"src": "bin/envoy", "dst": "{{envoy_workspace}}/bin/envoy"}
+      - {"src": "bin/envoyd.sh", "dst": "{{envoy_workspace}}/bin/envoyd.sh"}
+      - {"src": "bin/start_envoy.sh", "dst": "{{envoy_workspace}}/bin/start_envoy.sh"}
+      - {"src": "bin/hot-restarter.py", "dst": "{{envoy_workspace}}/bin/hot-restarter.py"}
+      - {"src": "conf/server.json", "dst": "{{envoy_workspace}}/conf/server.json"}
+      - {"src": "pb/proto.pb", "dst": "{{envoy_workspace}}/pb/proto.pb"}

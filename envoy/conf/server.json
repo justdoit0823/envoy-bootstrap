@@ -1,0 +1,95 @@
+{
+    "listeners": [
+	{
+	    "name": "grpc",
+	    "address": "tcp://127.0.0.1:50021",
+	    "filters": [
+		{
+		    "type": "read",
+		    "name": "http_connection_manager",
+		    "config": {
+			"codec_type": "auto",
+			"stat_prefix": "router",
+			"route_config": {
+			    "virtual_hosts": [
+				{
+				    "name": "grpc-local-server",
+				    "domains": ["*"],
+				    "routes": [
+					{
+					    "path": "/helloworld.Greeter/SayHello",
+					    "cluster": "envoy.benchmark",
+					    "timeout_ms": 3000,
+					    "retry_policy": {
+						"retry_on": "5xx",
+						"num_retries": 3,
+						"per_try_timeout_ms": 1000
+					    },
+					    "priority": "default"
+					}
+				    ],
+				    "rate_limits": []
+				}
+			    ],
+			    "internal_only_headers": [],
+			    "response_headers_to_remove": []
+			},
+			"filters": [
+			    {"name": "router", "config": {}}
+			],
+			"add_user_agent": true,
+			"idle_timeout_s": 840,
+			"access_log": [
+			    {"path": "logs/error.log"},
+			    {"path": "logs/access.log"}
+			],
+			"generate_request_id": true
+		    }
+		}
+	    ],
+	    "bind_to_port": true,
+	    "use_original_dst": false,
+	    "use_proxy_proto": false,
+	    "per_connection_buffer_limit_bytes": 4096
+	}
+    ],
+    "admin": {
+	"access_log_path": "logs/admin.log",
+	"address": "tcp://127.0.0.1:11011"
+    },
+    "cluster_manager": {
+	"clusters": [
+	    {
+		"name": "envoy.benchmark",
+		"type": "static",
+		"connect_timeout_ms": 1000,
+		"per_connection_buffer_limit_bytes": 4096,
+		"lb_type": "round_robin",
+		"hosts": [
+		    {"url": "tcp://127.0.0.1:50061"},
+		],
+		"service_name": "envoy-benchmark",
+		"max_requests_per_connection": 1000,
+		"circuit_breakers": {},
+		"features": "http2",
+		"cleanup_interval_ms": 5000,
+		"dns_refresh_rate_ms": 5000,
+		"dns_lookup_family": "v4_only",
+		"outlier_detection": {
+		    "consecutive_5xx": 3,
+		    "interval_ms": 10000,
+		    "max_ejection_percent": 50
+		}
+	    }
+	],
+	"local_cluster_name": "grpc.local",
+	"outlier_detection": {
+	    "event_log_path": "logs/health_check.event"
+	}
+    },
+    "stats_flush_interval_ms": 100,
+    "watchdog_miss_timeout_ms": 1000,
+    "watchdog_megamiss_timeout_ms": 1000,
+    "watchdog_kill_timeout_ms": 2000,
+    "watchdog_multikill_timeout_ms": 2000
+}
