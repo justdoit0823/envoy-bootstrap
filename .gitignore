@@ -5,3 +5,9 @@
 *.pyc
 
 *.DS_Store
+
+envoy.retry
+
+envoy/bin/envoy
+
+libstdc++.so.6
