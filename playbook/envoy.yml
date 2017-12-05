@@ -18,6 +18,7 @@
       - "{{envoy_workspace}}/lib64"
       - "{{envoy_workspace}}/logs"
       - "{{envoy_workspace}}/pb"
+      - "{{envoy_workspace}}/benchmark"
 
   - name: upload envoy files
     synchronize:
@@ -38,7 +39,11 @@
       - {"src": "../envoy/bin/start_envoy.sh", "dst": "{{envoy_workspace}}/bin/start_envoy.sh"}
       - {"src": "../envoy/bin/hot-restarter.py", "dst": "{{envoy_workspace}}/bin/hot-restarter.py"}
       - {"src": "../envoy/conf/server.json", "dst": "{{envoy_workspace}}/conf/server.json"}
-      # - {"src": "../envoy/pb/proto.pb", "dst": "{{envoy_workspace}}/pb/proto.pb"}
+      - {"src": "../benchmark/helloworld_pb2.py", "dst": "{{envoy_workspace}}/benchmark/helloworld_pb2.py"}
+      - {"src": "../benchmark/helloworld_pb2_grpc.py", "dst": "{{envoy_workspace}}/benchmark/helloworld_pb2_grpc.py"}
+      - {"src": "../benchmark/benchmark_grpc_server.sh", "dst": "{{envoy_workspace}}/benchmark/benchmark_grpc_server.sh"}
+      - {"src": "../benchmark/greeter_server.py", "dst": "{{envoy_workspace}}/benchmark/greeter_server.py"}
+      - {"src": "../benchmark/start_benchmark_server.sh", "dst": "{{envoy_workspace}}/benchmark/start_benchmark_server.sh"}
 
   - name: upload library
     synchronize:
