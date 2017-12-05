@@ -44,7 +44,7 @@ Then, copy the executable envoy into `envoy/bin` directory.
 cp /path/envoy ./envoy-bootstrap/envoy/bin
 ```
 
-(Optional)On some centos machines, you could copy `libstdc++.so.6` rather than installing gcc-4.9 .
+(Optional)On some centos machines, you could copy `libstdc++.so.6` into the `envoy/lib64` directory rather than installing gcc-4.9 .
 
 
 Next, define your envoy proxy server in ansible's iventory files `staging` and `production`.
@@ -60,8 +60,10 @@ Now, you can deploy envoy to remote servers with ansible.
 ```bash
 cd envoy-bootstrap/envoy
 
-ansible-playbook -i staging -K envoy.yml -e user=envoy -e envoy_workspace=/home/envoy/workspace
+ansible-playbook -i staging -K envoy.yml -e user=envoy -e envoy_workspace=/home/envoy/workspace -e skip_libs=true
 ```
+
+**Define skip_libs variable will skip files under envoy/lib64 directory.***
 
 
 Why building this project
