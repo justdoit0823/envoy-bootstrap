@@ -4,9 +4,7 @@
 
 - hosts: envoy-servers
   remote_user: "{{user}}"
-  gather_facts: false
-  vars:
-    ansible_become_pass: "{{become_pass}}"
+  gather_facts: true
   tasks:
   - name: build envoy workspace
     file:
@@ -35,9 +33,61 @@
         - "--exclude=*.pyc"
         - "--exclude=*~"
     with_items:
-      - {"src": "bin/envoy", "dst": "{{envoy_workspace}}/bin/envoy"}
-      - {"src": "bin/envoyd.sh", "dst": "{{envoy_workspace}}/bin/envoyd.sh"}
-      - {"src": "bin/start_envoy.sh", "dst": "{{envoy_workspace}}/bin/start_envoy.sh"}
-      - {"src": "bin/hot-restarter.py", "dst": "{{envoy_workspace}}/bin/hot-restarter.py"}
-      - {"src": "conf/server.json", "dst": "{{envoy_workspace}}/conf/server.json"}
-      - {"src": "pb/proto.pb", "dst": "{{envoy_workspace}}/pb/proto.pb"}
+      - {"src": "../envoy/bin/envoy", "dst": "{{envoy_workspace}}/bin/envoy"}
+      - {"src": "../envoy/bin/envoyd.sh", "dst": "{{envoy_workspace}}/bin/envoyd.sh"}
+      - {"src": "../envoy/bin/start_envoy.sh", "dst": "{{envoy_workspace}}/bin/start_envoy.sh"}
+      - {"src": "../envoy/bin/hot-restarter.py", "dst": "{{envoy_workspace}}/bin/hot-restarter.py"}
+      - {"src": "../envoy/conf/server.json", "dst": "{{envoy_workspace}}/conf/server.json"}
+      # - {"src": "../envoy/pb/proto.pb", "dst": "{{envoy_workspace}}/pb/proto.pb"}
+
+  - name: upload library
+    synchronize:
+      src: "{{item.src}}"
+      dest: "{{item.dst}}"
+      archive: true
+      checksum: true
+      compress: true
+      rsync_opts:
+        - "--exclude=.git"
+        - "--exclude=.cache"
+        - "--exclude=logs"
+        - "--exclude=*.pyc"
+        - "--exclude=*~"
+    with_items:
+      - {"src": "../envoy/lib64/libstdc++.so.6", "dst": "{{envoy_workspace}}/lib64/libstdc++.so.6"}
+    when: skip_libs is undefined
+
+  - name: install monit on centos
+    become: true
+    yum:
+      name: monit
+      state: latest
+
+    when: ansible_os_family == "CentOS"
+
+  - name: install monit on debian
+    become: true
+    apt:
+      name: monit
+      state: latest
+
+    when: ansible_os_family == "Debian"
+
+  - name: start monit service
+    service:
+      name: monit
+      state: started
+
+  - name: compile envoy configuration
+    become: true
+    template:
+      src: "envoy.conf.j2"
+      dest: "{% if ansible_os_family == \"Debian\" %}/etc/monit/conf-enabled{% else %}/etc/monit.d{% endif %}/envoy.conf"
+    notify: reload monit
+
+  handlers:
+  - name: reload monit service
+    listen: reload monit
+    service:
+      name: monit
+      state: reload

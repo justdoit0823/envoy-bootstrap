@@ -1,0 +1,5 @@
+
+check process envoy
+    matching "python {{envoy_workspace}}/bin/hot-restarter.py {{envoy_workspace}}/bin/start_envoy.sh"
+    start program = "{{envoy_workspace}}/bin/envoyd.sh start"
+        as uid {{user}} and gid {{user}}

@@ -18,7 +18,7 @@
 				    "routes": [
 					{
 					    "path": "/helloworld.Greeter/SayHello",
-					    "cluster": "envoy.benchmark",
+					    "cluster": "grpc.local",
 					    "timeout_ms": 3000,
 					    "retry_policy": {
 						"retry_on": "5xx",
@@ -60,13 +60,13 @@
     "cluster_manager": {
 	"clusters": [
 	    {
-		"name": "envoy.benchmark",
+		"name": "grpc.local",
 		"type": "static",
 		"connect_timeout_ms": 1000,
 		"per_connection_buffer_limit_bytes": 4096,
 		"lb_type": "round_robin",
 		"hosts": [
-		    {"url": "tcp://127.0.0.1:50061"},
+		    {"url": "tcp://127.0.0.1:50061"}
 		],
 		"service_name": "envoy-benchmark",
 		"max_requests_per_connection": 1000,

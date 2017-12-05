@@ -1,5 +1,0 @@
-
-check process envoy
-    matching "python /home/works/webserver/envoy/bin/hot-restarter.py /home/works/webserver/envoy/bin/start_envoy.sh"
-    start program = "/home/works/webserver/envoy/bin/envoyd.sh start"
-        as uid works and gid works
