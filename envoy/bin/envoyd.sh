@@ -21,10 +21,17 @@ function get_master_pid(){
 }
 
 
-function start_envoy(){
+function set_ld_path(){
 
     libpath=`pwd`"/lib64"
     export LD_LIBRARY_PATH=$libpath:$LD_LIBRARY_PATH
+
+}
+
+
+function start_envoy(){
+
+    set_ld_path
 
     exec ./bin/hot-restarter.py ./bin/start_envoy.sh &
 
@@ -58,6 +65,8 @@ function reload_envoy(){
 	return
 
     fi
+
+    set_ld_path
 
     ./bin/envoy --mode validate -c conf/server.json --base-id 24
     if [[ $? != 0 ]]; then
