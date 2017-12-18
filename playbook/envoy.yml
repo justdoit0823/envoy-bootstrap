@@ -95,4 +95,4 @@
     listen: reload monit
     service:
       name: monit
-      state: reload
+      state: reloaded
