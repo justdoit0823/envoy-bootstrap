@@ -79,6 +79,7 @@
     when: ansible_os_family == "Debian"
 
   - name: start monit service
+    become: true
     service:
       name: monit
       state: started
@@ -92,6 +93,7 @@
 
   handlers:
   - name: reload monit service
+    become: true
     listen: reload monit
     service:
       name: monit
